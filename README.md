@@ -33,7 +33,7 @@
 * **🛡️ 容错与草稿箱**：网络失败不再丢数据，自动存入 Drafts 草稿箱，支持一键重试。
 
 ### 🎨 v2.0 设计预览
-*(此处可放置你 Figma 导出的 v2.0 设计图，如果没有，可保留此占位符)*
+*[![Figma Prototype](https://www.figma.com/make/rCCEQ0FwF4Nxhu76ELrjqX/iOS-Home-Screen-Design?t=72eNiy6t0fJOUO3q-1)]*
 > *[v2.0 UI Mockups Coming Soon]*
 
 ---
