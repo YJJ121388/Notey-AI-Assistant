@@ -27,6 +27,5 @@ struct NoteyApp: App {
         WindowGroup {
             ContentView()
         }
-        .modelContainer(sharedModelContainer)
     }
 }
