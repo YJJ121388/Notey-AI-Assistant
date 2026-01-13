@@ -34,7 +34,7 @@ struct AddFolderSheetView: View {
                         }
                         .overlay {
                             RoundedRectangle(cornerRadius: 20)
-                                .stroke(.white.opacity(0.7), lineWidth: 2)
+                                .stroke(.white.opacity(0.5), lineWidth: 1.5)
                         }
                         .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
                     
