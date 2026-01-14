@@ -13,6 +13,18 @@ struct NoteDetailView: View {
     @State private var editedTitle: String
     @State private var editedContent: String
     
+    private let maxTitleCharacters = 30
+    
+    // 计算标题字符数
+    private var titleCharacterCount: Int {
+        editedTitle.count
+    }
+    
+    // 判断标题是否达到上限
+    private var isTitleAtLimit: Bool {
+        titleCharacterCount >= maxTitleCharacters
+    }
+    
     let onBack: () -> Void
     let onSave: (String, String, String) -> Void
     
@@ -209,16 +221,41 @@ struct NoteDetailView: View {
             
             ScrollView {
                 VStack(spacing: 12) {
+                    // 标题输入框 - 支持拼音输入
                     GlassCard {
-                        TextField("标题", text: $editedTitle)
-                            .font(.system(size: 28, weight: .bold))
-                            .foregroundColor(.white)
-                            .padding(20)
+                        ZStack(alignment: .topLeading) {
+                            VStack(alignment: .leading, spacing: 0) {
+                                // 标题输入 - 使用自定义组件处理拼音
+                                TitleTextView(
+                                    text: $editedTitle,
+                                    placeholder: "标题",
+                                    maxLength: maxTitleCharacters
+                                )
+                                .frame(height: 70)
+                                .padding(.top, 16)
+                                .padding(.leading, 20)
+                                .padding(.trailing, 70)
+                                
+                                Spacer()
+                                
+                                // 字数统计 - 固定在右下角
+                                HStack {
+                                    Spacer()
+                                    Text("\(titleCharacterCount)/\(maxTitleCharacters)")
+                                        .font(.system(size: 14, weight: .medium))
+                                        .foregroundColor(isTitleAtLimit ? .red.opacity(0.9) : .white.opacity(0.6))
+                                        .padding(.trailing, 16)
+                                        .padding(.bottom, 12)
+                                }
+                            }
+                        }
+                        .frame(height: 120)
                     }
                     
+                    // 正文输入框
                     GlassCard {
                         TextEditor(text: $editedContent)
-                            .font(.system(size: 17))
+                            .font(.system(size: 16))
                             .foregroundColor(.white.opacity(0.9))
                             .scrollContentBackground(.hidden)
                             .frame(minHeight: 300)
@@ -244,4 +281,98 @@ struct NoteDetailView: View {
         onBack: {},
         onSave: { _, _, _ in }
     )
+}
+
+// 自定义标题输入框，支持拼音输入时不截断
+struct TitleTextView: UIViewRepresentable {
+    @Binding var text: String
+    let placeholder: String
+    let maxLength: Int
+    
+    func makeUIView(context: Context) -> UITextView {
+        let textView = UITextView()
+        textView.delegate = context.coordinator
+        textView.textColor = .white
+        textView.tintColor = .white
+        textView.font = .systemFont(ofSize: 24, weight: .bold)
+        textView.backgroundColor = .clear
+        textView.isScrollEnabled = true
+        textView.showsVerticalScrollIndicator = false
+        textView.textContainerInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+        textView.textContainer.lineFragmentPadding = 0
+        textView.textContainer.lineBreakMode = .byCharWrapping
+        
+        // 添加 placeholder
+        context.coordinator.placeholderLabel = UILabel()
+        context.coordinator.placeholderLabel?.text = placeholder
+        context.coordinator.placeholderLabel?.font = .systemFont(ofSize: 24, weight: .bold)
+        context.coordinator.placeholderLabel?.textColor = UIColor.white.withAlphaComponent(0.5)
+        context.coordinator.placeholderLabel?.translatesAutoresizingMaskIntoConstraints = false
+        
+        if let placeholderLabel = context.coordinator.placeholderLabel {
+            textView.addSubview(placeholderLabel)
+            NSLayoutConstraint.activate([
+                placeholderLabel.leadingAnchor.constraint(equalTo: textView.leadingAnchor),
+                placeholderLabel.topAnchor.constraint(equalTo: textView.topAnchor)
+            ])
+        }
+        
+        return textView
+    }
+    
+    func updateUIView(_ uiView: UITextView, context: Context) {
+        if uiView.text != text {
+            uiView.text = text
+        }
+        
+        // 更新 placeholder 可见性
+        context.coordinator.placeholderLabel?.isHidden = !text.isEmpty
+    }
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(text: $text, maxLength: maxLength)
+    }
+    
+    class Coordinator: NSObject, UITextViewDelegate {
+        @Binding var text: String
+        let maxLength: Int
+        var placeholderLabel: UILabel?
+        
+        init(text: Binding<String>, maxLength: Int) {
+            _text = text
+            self.maxLength = maxLength
+        }
+        
+        func textViewDidChange(_ textView: UITextView) {
+            let currentText = textView.text ?? ""
+            
+            // 检查是否有未确认的拼音输入（markedText）
+            if let markedTextRange = textView.markedTextRange,
+               let _ = textView.text(in: markedTextRange) {
+                // 正在输入拼音，不进行截断，只更新绑定
+                text = currentText
+            } else {
+                // 拼音已确认，进行长度限制
+                if currentText.count > maxLength {
+                    let limitedText = String(currentText.prefix(maxLength))
+                    textView.text = limitedText
+                    text = limitedText
+                } else {
+                    text = currentText
+                }
+            }
+            
+            // 更新 placeholder 可见性
+            placeholderLabel?.isHidden = !textView.text.isEmpty
+        }
+        
+        func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+            // 处理回车键 - 收起键盘
+            if text == "\n" {
+                textView.resignFirstResponder()
+                return false
+            }
+            return true
+        }
+    }
 }

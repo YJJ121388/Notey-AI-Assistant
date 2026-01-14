@@ -1,17 +1,16 @@
 //
-//  DraftDetailView.swift
+//  VideoTooLongDetailView.swift
 //  Notey
 //
-//  Created by 盐焗鸡 on 12/1/2026.
+//  Created by 盐焗鸡 on 14/1/2026.
 //
 
 import SwiftUI
 
-struct DraftDetailView: View {
+struct VideoTooLongDetailView: View {
     let draft: DraftNote
     let onBack: () -> Void
     let onDelete: (String) -> Void
-    let onRetry: (String) -> Void
     
     @State private var showCopiedToast = false
     
@@ -59,18 +58,18 @@ struct DraftDetailView: View {
                             VStack(spacing: 24) {
                                 ZStack {
                                     Circle()
-                                        .fill(.red.opacity(0.2))
+                                        .fill(.orange.opacity(0.2))
                                         .overlay {
                                             Circle()
-                                                .stroke(.red.opacity(0.5), lineWidth: 1)
+                                                .stroke(.orange.opacity(0.5), lineWidth: 1)
                                         }
                                         .frame(width: 64, height: 64)
                                     
-                                    Text("⚠️")
+                                    Text("⏱️")
                                         .font(.system(size: 32))
                                 }
                                 
-                                Text("笔记录入失败")
+                                Text("视频时长过长")
                                     .font(.system(size: 20, weight: .semibold))
                                     .foregroundColor(.white)
                                 
@@ -78,7 +77,7 @@ struct DraftDetailView: View {
                                     .font(.system(size: 13))
                                     .foregroundColor(.white.opacity(0.6))
                                 
-                                Text("您的笔记没有被 Notey 捕捉到，以下是原视频链接，您可以尝试再次发送给 Notey 重新记录")
+                                Text("您选择的视频时长太长，Notey 暂时无法为您捕捉。为了避免错失这个内容，Notey 为您记录下了这个视频的地址")
                                     .font(.system(size: 15))
                                     .foregroundColor(.white.opacity(0.9))
                                     .multilineTextAlignment(.center)
@@ -128,41 +127,22 @@ struct DraftDetailView: View {
                                     .padding(16)
                                 }
                                 
-                                VStack(spacing: 12) {
-                                    Button(action: {
-                                        onRetry(draft.id)
-                                    }) {
-                                        GlassCard {
-                                            HStack {
-                                                Image(systemName: "arrow.clockwise")
-                                                    .font(.system(size: 20))
-                                                    .foregroundColor(.white)
-                                                
-                                                Text("重新记录")
-                                                    .font(.system(size: 16, weight: .semibold))
-                                                    .foregroundColor(.white)
-                                            }
-                                            .frame(maxWidth: .infinity)
-                                            .padding(16)
+                                // 只有删除按钮，没有重新记录
+                                Button(action: {
+                                    onDelete(draft.id)
+                                }) {
+                                    GlassCard {
+                                        HStack {
+                                            Image(systemName: "trash")
+                                                .font(.system(size: 20))
+                                                .foregroundColor(.white)
+                                            
+                                            Text("删除")
+                                                .font(.system(size: 16, weight: .semibold))
+                                                .foregroundColor(.white)
                                         }
-                                    }
-                                    
-                                    Button(action: {
-                                        onDelete(draft.id)
-                                    }) {
-                                        GlassCard {
-                                            HStack {
-                                                Image(systemName: "trash")
-                                                    .font(.system(size: 20))
-                                                    .foregroundColor(.white)
-                                                
-                                                Text("删除")
-                                                    .font(.system(size: 16, weight: .semibold))
-                                                    .foregroundColor(.white)
-                                            }
-                                            .frame(maxWidth: .infinity)
-                                            .padding(16)
-                                        }
+                                        .frame(maxWidth: .infinity)
+                                        .padding(16)
                                     }
                                 }
                             }
@@ -175,7 +155,7 @@ struct DraftDetailView: View {
                                     .font(.system(size: 15, weight: .semibold))
                                     .foregroundColor(.white.opacity(0.8))
                                 
-                                Text("由于网络等原因，您的内容并没有被Notey捕捉到")
+                                Text("Notey 现在只支持 30min 以内的视频内容捕捉哦")
                                     .font(.system(size: 14))
                                     .foregroundColor(.white.opacity(0.7))
                                     .lineSpacing(4)
@@ -184,7 +164,7 @@ struct DraftDetailView: View {
                         }
                     }
                     .padding(.horizontal, 16)
-                    .padding(.bottom, 40) // 为底部安全区域留出空间
+                    .padding(.bottom, 40)
                 }
                 .scrollIndicators(.hidden)
             }
@@ -227,16 +207,15 @@ struct DraftDetailView: View {
 }
 
 #Preview {
-    DraftDetailView(
+    VideoTooLongDetailView(
         draft: DraftNote(
             id: "preview-draft",
-            title: "UX Workshop Notes",
-            summary: "Brainstorming session on improving user onboarding experience",
+            title: "长视频笔记",
+            summary: "视频时长过长无法处理",
             timestamp: "Yesterday",
-            videoUrl: "https://example.com/video/ux-workshop"
+            videoUrl: "https://example.com/video/long-video"
         ),
         onBack: {},
-        onDelete: { _ in },
-        onRetry: { _ in }
+        onDelete: { _ in }
     )
 }

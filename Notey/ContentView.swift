@@ -69,12 +69,14 @@ struct ContentView: View {
         DraftNote(id: "5", title: "Marketing Strategy Call", summary: "Q1 campaign planning and budget allocation discussion", timestamp: "Jan 7", videoUrl: "https://example.com/video/marketing-call"),
         DraftNote(id: "6", title: "Engineering Sync", summary: "Technical architecture review and performance optimization", timestamp: "Jan 6", videoUrl: "https://example.com/video/engineering-sync")
     ]
+    @State private var defaultFolder: Folder = Folder(id: "default-folder", title: "默认文件夹", icon: "📁", children: [])
     @State private var selectedDraft: DraftNote? = nil
     @State private var selectedNote: Note? = nil
     @State private var showAIConfig = false
     @State private var showNotificationSettings = false
     @State private var showDataManagement = false
     @State private var showAbout = false
+    @State private var scrollToUncategorized = false // 是否滚动到未分类区域
     @StateObject private var toastManager = ToastManager()
     
     // 移动笔记到文件夹的函数
@@ -90,20 +92,36 @@ struct ContentView: View {
         let note = uncategorizedNotes[noteIndex]
         print("✅ 找到笔记: \(note.title)")
         
-        // 找到文件夹
-        guard let folderIndex = personalLibrary.firstIndex(where: { $0.id == folderId }) else {
-            print("❌ 未找到文件夹")
-            return
-        }
+        var folderTitle: String = ""
         
-        print("✅ 找到文件夹: \(personalLibrary[folderIndex].title)")
-        
-        // 添加笔记到文件夹
-        if personalLibrary[folderIndex].children == nil {
-            personalLibrary[folderIndex].children = []
+        // 检查是否是默认文件夹
+        if folderId == defaultFolder.id {
+            folderTitle = defaultFolder.title
+            print("✅ 找到默认文件夹: \(folderTitle)")
+            
+            // 添加笔记到默认文件夹
+            if defaultFolder.children == nil {
+                defaultFolder.children = []
+            }
+            defaultFolder.children?.append(note)
+            print("✅ 添加成功，默认文件夹子笔记数: \(defaultFolder.children?.count ?? 0)")
+        } else {
+            // 找到普通文件夹
+            guard let folderIndex = personalLibrary.firstIndex(where: { $0.id == folderId }) else {
+                print("❌ 未找到文件夹")
+                return
+            }
+            
+            folderTitle = personalLibrary[folderIndex].title
+            print("✅ 找到文件夹: \(folderTitle)")
+            
+            // 添加笔记到文件夹
+            if personalLibrary[folderIndex].children == nil {
+                personalLibrary[folderIndex].children = []
+            }
+            personalLibrary[folderIndex].children?.append(note)
+            print("✅ 添加成功，文件夹子笔记数: \(personalLibrary[folderIndex].children?.count ?? 0)")
         }
-        personalLibrary[folderIndex].children?.append(note)
-        print("✅ 添加成功，文件夹子笔记数: \(personalLibrary[folderIndex].children?.count ?? 0)")
         
         // 从未分类笔记中移除
         uncategorizedNotes.remove(at: noteIndex)
@@ -116,6 +134,9 @@ struct ContentView: View {
             recentlyClassifiedNotes = Array(recentlyClassifiedNotes.prefix(8))
         }
         print("✅ 添加到最近笔记，当前数量: \(recentlyClassifiedNotes.count)")
+        
+        // 显示分类成功提示
+        toastManager.show("分类归档成功，已归档至「\(folderTitle)」")
     }
     
     // 删除笔记的函数
@@ -129,6 +150,16 @@ struct ContentView: View {
             personalLibrary.remove(at: folderIndex)
             print("✅ 删除文件夹成功: \(folderTitle)")
             toastManager.show("文件夹「\(folderTitle)」已删除")
+            return
+        }
+        
+        // 检查默认文件夹中的笔记
+        if let children = defaultFolder.children,
+           let noteIndex = children.firstIndex(where: { $0.id == noteId }) {
+            let noteTitle = children[noteIndex].title
+            defaultFolder.children?.remove(at: noteIndex)
+            print("✅ 从默认文件夹中删除笔记: \(noteTitle)")
+            toastManager.show("笔记「\(noteTitle)」已删除")
             return
         }
         
@@ -174,11 +205,18 @@ struct ContentView: View {
                     HomeView(
                         uncategorizedNotes: $uncategorizedNotes,
                         draftNotes: $draftNotes,
+                        personalLibrary: $personalLibrary,
+                        defaultFolder: $defaultFolder,
                         onNoteClick: { noteId in
                             activeTab = .notes
                         },
                         onDraftClick: { draftId in
                             selectedDraft = draftNotes.first { $0.id == draftId }
+                        },
+                        onMoveNoteToFolder: moveNoteToFolder,
+                        onViewAllUncategorized: {
+                            scrollToUncategorized = true
+                            activeTab = .notes
                         }
                     )
                 } else if activeTab == .notes {
@@ -186,9 +224,17 @@ struct ContentView: View {
                         personalLibrary: $personalLibrary,
                         uncategorizedNotes: $uncategorizedNotes,
                         recentlyClassifiedNotes: $recentlyClassifiedNotes,
+                        defaultFolder: $defaultFolder,
                         onMoveNoteToFolder: moveNoteToFolder,
                         onDeleteNote: deleteNote,
+                        scrollToUncategorized: scrollToUncategorized,
                         onLibraryNoteClick: { noteId in
+                            // 先检查默认文件夹
+                            if let note = defaultFolder.children?.first(where: { $0.id == noteId }) {
+                                selectedNote = note
+                                return
+                            }
+                            // 再检查其他文件夹
                             if let folder = personalLibrary.first(where: { $0.children?.contains(where: { $0.id == noteId }) ?? false }) {
                                 selectedNote = folder.children?.first { $0.id == noteId }
                             }
@@ -197,6 +243,10 @@ struct ContentView: View {
                             // Handle uncategorized note click
                         }
                     )
+                    .onDisappear {
+                        // 离开 LibraryView 时重置滚动状态
+                        scrollToUncategorized = false
+                    }
                 } else if activeTab == .settings {
                     SettingsView { itemId in
                         if itemId == "1" {

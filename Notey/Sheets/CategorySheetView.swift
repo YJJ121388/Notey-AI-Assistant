@@ -9,8 +9,16 @@ import SwiftUI
 
 struct CategorySheetView: View {
     @Environment(\.dismiss) var dismiss
-    let categories: [CategoryItem]
+    @State private var localCategories: [CategoryItem]
+    @State private var showAddFolderSheet = false
     let onSelectCategory: (String) -> Void
+    let onAddFolder: ((String) -> Void)?
+    
+    init(categories: [CategoryItem], onSelectCategory: @escaping (String) -> Void, onAddFolder: ((String) -> Void)? = nil) {
+        self._localCategories = State(initialValue: categories)
+        self.onSelectCategory = onSelectCategory
+        self.onAddFolder = onAddFolder
+    }
     
     var body: some View {
         VStack(spacing: 0) {
@@ -22,27 +30,65 @@ struct CategorySheetView: View {
                 .padding(.bottom, 20)
             
             // Categories List
-            if categories.isEmpty {
-                VStack(spacing: 16) {
-                    Image(systemName: "folder.badge.plus")
-                        .font(.system(size: 48))
-                        .foregroundColor(.white.opacity(0.4))
+            ScrollView {
+                VStack(spacing: 12) {
+                    // 新建文件夹按钮
+                    Button(action: {
+                        showAddFolderSheet = true
+                    }) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(.white.opacity(0.15))
+                                .overlay {
+                                    RoundedRectangle(cornerRadius: 20)
+                                        .stroke(.white.opacity(0.4), lineWidth: 1.5)
+                                }
+                                .shadow(color: .black.opacity(0.12), radius: 8, x: 0, y: 4)
+                            
+                            HStack(spacing: 12) {
+                                ZStack {
+                                    Circle()
+                                        .fill(.white.opacity(0.2))
+                                        .frame(width: 36, height: 36)
+                                    
+                                    Image(systemName: "plus")
+                                        .font(.system(size: 18, weight: .semibold))
+                                        .foregroundColor(.white)
+                                }
+                                
+                                Text("新建文件夹")
+                                    .font(.system(size: 17, weight: .semibold))
+                                    .foregroundColor(.white)
+                                
+                                Spacer()
+                            }
+                            .padding(.horizontal, 16)
+                        }
+                        .frame(height: 60)
+                    }
                     
-                    Text("暂无文件夹")
-                        .font(.system(size: 17, weight: .semibold))
-                        .foregroundColor(.white)
+                    // 分隔线
+                    if !localCategories.isEmpty {
+                        Rectangle()
+                            .fill(.white.opacity(0.2))
+                            .frame(height: 1)
+                            .padding(.vertical, 4)
+                    }
                     
-                    Text("请先在「我的笔记」中创建文件夹")
-                        .font(.system(size: 15))
-                        .foregroundColor(.white.opacity(0.7))
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 40)
-                .padding(.bottom, 20)
-            } else {
-                ScrollView {
-                    VStack(spacing: 12) {
-                        ForEach(categories) { category in
+                    // 文件夹列表
+                    if localCategories.isEmpty {
+                        VStack(spacing: 12) {
+                            Text("暂无文件夹")
+                                .font(.system(size: 15))
+                                .foregroundColor(.white.opacity(0.6))
+                            
+                            Text("点击上方按钮创建文件夹")
+                                .font(.system(size: 13))
+                                .foregroundColor(.white.opacity(0.4))
+                        }
+                        .padding(.vertical, 20)
+                    } else {
+                        ForEach(localCategories) { category in
                             Button(action: {
                                 onSelectCategory(category.id)
                                 dismiss()
@@ -78,11 +124,11 @@ struct CategorySheetView: View {
                             }
                         }
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 20)
                 }
-                .scrollIndicators(.hidden)
+                .padding(.horizontal, 20)
+                .padding(.bottom, 20)
             }
+            .scrollIndicators(.hidden)
         }
         .presentationBackground {
             ZStack {
@@ -116,28 +162,39 @@ struct CategorySheetView: View {
         }
         .presentationDetents([.height(calculateSheetHeight())])
         .presentationDragIndicator(.hidden)
+        .sheet(isPresented: $showAddFolderSheet) {
+            AddFolderSheetView(onAddFolder: { name in
+                // 创建新文件夹并添加到列表最前面
+                let newFolder = CategoryItem(id: UUID().uuidString, title: name, icon: "📁")
+                localCategories.insert(newFolder, at: 0)
+                // 通知外部创建文件夹
+                onAddFolder?(name)
+            })
+        }
     }
     
     // 根据分类数量动态计算 sheet 高度
     private func calculateSheetHeight() -> CGFloat {
         let dragIndicatorHeight: CGFloat = 28 // 拖动指示器高度
+        let addButtonHeight: CGFloat = 60 // 新建按钮高度
+        let dividerHeight: CGFloat = 9 // 分隔线高度
         let itemHeight: CGFloat = 60 // 每个分类项的高度
         let spacing: CGFloat = 12 // 项之间的间距
         let bottomPadding: CGFloat = 20 // 底部内边距
-        let emptyStateHeight: CGFloat = 176 // 空状态内容高度
+        let emptyStateHeight: CGFloat = 80 // 空状态提示高度
         let maxVisibleItems: Int = 4 // 最多显示 4 个文件夹
         
-        if categories.isEmpty {
-            // 空状态：拖动指示器 + 空状态内容
-            return dragIndicatorHeight + emptyStateHeight
+        if localCategories.isEmpty {
+            // 空状态：拖动指示器 + 新建按钮 + 空状态提示
+            return dragIndicatorHeight + addButtonHeight + spacing + emptyStateHeight + bottomPadding
         }
         
         // 计算实际显示的项数（最多 4 个）
-        let visibleItemCount = min(categories.count, maxVisibleItems)
+        let visibleItemCount = min(localCategories.count, maxVisibleItems)
         
-        // 有内容：拖动指示器 + 内容区域（最多 4 个项）
+        // 有内容：拖动指示器 + 新建按钮 + 分隔线 + 内容区域
         let itemsHeight = (CGFloat(visibleItemCount) * itemHeight) + (CGFloat(max(0, visibleItemCount - 1)) * spacing)
-        let totalHeight = dragIndicatorHeight + itemsHeight + bottomPadding
+        let totalHeight = dragIndicatorHeight + addButtonHeight + spacing + dividerHeight + itemsHeight + bottomPadding
         
         return totalHeight
     }
@@ -160,7 +217,8 @@ struct CategorySheetView: View {
                 CategoryItem(id: "2", title: "TERM 2", icon: "📁"),
                 CategoryItem(id: "3", title: "神经网络学习", icon: "🧠")
             ],
-            onSelectCategory: { _ in }
+            onSelectCategory: { _ in },
+            onAddFolder: { _ in }
         )
     }
 }

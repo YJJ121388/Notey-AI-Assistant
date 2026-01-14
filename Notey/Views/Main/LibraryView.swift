@@ -11,8 +11,10 @@ struct LibraryView: View {
     @Binding var personalLibrary: [Folder]
     @Binding var uncategorizedNotes: [Note]
     @Binding var recentlyClassifiedNotes: [Note] // 最近分类的笔记
+    @Binding var defaultFolder: Folder // 默认文件夹
     let onMoveNoteToFolder: (String, String) -> Void  // (noteId, folderId) -> Void
     let onDeleteNote: (String) -> Void  // 删除笔记的回调
+    var scrollToUncategorized: Bool = false // 是否滚动到未分类区域
     @State private var expandedFolders: Set<String> = []
     @State private var expandedFavoriteFolders: Set<String> = [] // 用于"我的收藏"区域的展开状态
     @State private var favorites: Set<String> = ["11", "11-1"]
@@ -20,9 +22,13 @@ struct LibraryView: View {
     @State private var isUncategorizedExpanded = true
     @State private var isMyNotesExpanded = true
     @State private var actionSheetId: String? = nil
+    @State private var uncategorizedActionSheetId: String? = nil // 未分类笔记的删除弹窗
     @State private var addFolderSheetId: String? = nil
     @State private var categorySheetNoteId: String? = nil
     @Namespace private var scrollNamespace
+    
+    // 默认文件夹ID
+    private let defaultFolderId = "default-folder"
     
     let onLibraryNoteClick: (String) -> Void
     let onUncategorizedNoteClick: (String) -> Void
@@ -322,6 +328,29 @@ struct LibraryView: View {
                                         .background(.white.opacity(0.2))
                                     
                                     VStack(spacing: 12) {
+                                        // 默认文件夹 - 始终在第一位
+                                        DefaultFolderRow(
+                                            folder: defaultFolder,
+                                            isExpanded: expandedFolders.contains(defaultFolderId),
+                                            isFavorited: favorites.contains(defaultFolderId),
+                                            onTap: { toggleFolder(defaultFolderId) },
+                                            onFavorite: { toggleFavorite(defaultFolderId) }
+                                        )
+                                        
+                                        if expandedFolders.contains(defaultFolderId), let children = defaultFolder.children {
+                                            ForEach(children) { child in
+                                                NoteRow(
+                                                    note: child,
+                                                    isFavorited: favorites.contains(child.id),
+                                                    onTap: { onLibraryNoteClick(child.id) },
+                                                    onFavorite: { toggleFavorite(child.id) },
+                                                    onMore: { actionSheetId = child.id }
+                                                )
+                                                .padding(.leading, 24)
+                                            }
+                                        }
+                                        
+                                        // 其他文件夹
                                         ForEach(personalLibrary) { folder in
                                             FolderRow(
                                                 folder: folder,
@@ -365,7 +394,7 @@ struct LibraryView: View {
                                             .font(.system(size: 20))
                                             .foregroundColor(.white.opacity(0.7))
                                         
-                                        Text("未分类笔记")
+                                        Text("未分类笔记：点击进行分类归档")
                                             .font(.system(size: 15, weight: .medium))
                                             .foregroundColor(.white)
                                         
@@ -386,7 +415,7 @@ struct LibraryView: View {
                                                 showFavoriteButton: false,
                                                 onTap: { categorySheetNoteId = note.id },
                                                 onFavorite: { },
-                                                onMore: { actionSheetId = note.id }
+                                                onMore: { uncategorizedActionSheetId = note.id }
                                             )
                                         }
                                     }
@@ -394,10 +423,22 @@ struct LibraryView: View {
                                 }
                             }
                         }
+                        .id("uncategorizedSection") // 未分类笔记区域 ID
                     }
                 }
                 .padding(.horizontal, 16)
                 .padding(.bottom, 150) // 为 TabBar 留出足够空间，防止遮挡
+                .onAppear {
+                    // 如果需要滚动到未分类区域
+                    if scrollToUncategorized {
+                        isUncategorizedExpanded = true // 确保展开
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            withAnimation {
+                                proxy.scrollTo("uncategorizedSection", anchor: .top)
+                            }
+                        }
+                    }
+                }
             }
             .scrollIndicators(.hidden)
         }
@@ -412,6 +453,19 @@ struct LibraryView: View {
                     print("🗑️ 删除笔记: \(item.id)")
                     onDeleteNote(item.id)
                     actionSheetId = nil
+                }
+            )
+        }
+        .sheet(item: Binding(
+            get: { uncategorizedActionSheetId.map { ActionSheetItem(id: $0) } },
+            set: { uncategorizedActionSheetId = $0?.id }
+        )) { item in
+            // 未分类笔记只显示删除按钮
+            DeleteOnlySheetView(
+                onDelete: {
+                    print("🗑️ 删除未分类笔记: \(item.id)")
+                    onDeleteNote(item.id)
+                    uncategorizedActionSheetId = nil
                 }
             )
         }
@@ -434,11 +488,19 @@ struct LibraryView: View {
             set: { categorySheetNoteId = $0?.id }
         )) { item in
             CategorySheetView(
-                categories: personalLibrary.map { CategoryItem(id: $0.id, title: $0.title, icon: $0.icon) },
+                categories: [CategoryItem(id: defaultFolder.id, title: defaultFolder.title, icon: defaultFolder.icon)] + personalLibrary.map { CategoryItem(id: $0.id, title: $0.title, icon: $0.icon) },
                 onSelectCategory: { categoryId in
                     print("🔍 选择分类，调用回调")
                     onMoveNoteToFolder(item.id, categoryId)
                     categorySheetNoteId = nil
+                },
+                onAddFolder: { name in
+                    let newFolder = Folder(
+                        title: name,
+                        icon: "📁",
+                        children: []
+                    )
+                    personalLibrary.insert(newFolder, at: 0)
                 }
             )
         }
@@ -525,6 +587,7 @@ struct CategoryItem: Identifiable {
             Note(id: "1-1", title: "Technical Interview Notes", icon: "📄"),
             Note(id: "11-1", title: "yolo模型与cnn", icon: "📄")
         ]
+        @State var defaultFolder = Folder(id: "default-folder", title: "默认文件夹", icon: "📁", children: [])
         
         var body: some View {
             ZStack {
@@ -541,6 +604,7 @@ struct CategoryItem: Identifiable {
                     personalLibrary: $library,
                     uncategorizedNotes: $uncategorized,
                     recentlyClassifiedNotes: $recentNotes,
+                    defaultFolder: $defaultFolder,
                     onMoveNoteToFolder: { noteId, folderId in
                         print("📦 Preview: 移动笔记 \(noteId) 到文件夹 \(folderId)")
                         
