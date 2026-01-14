@@ -10,6 +10,7 @@ import SwiftUI
 struct NoteRow: View {
     let note: Note
     let isFavorited: Bool
+    var showFavoriteButton: Bool = true
     let onTap: () -> Void
     let onFavorite: () -> Void
     let onMore: () -> Void
@@ -29,10 +30,12 @@ struct NoteRow: View {
                     Spacer()
                     
                     HStack(spacing: 8) {
-                        Button(action: onFavorite) {
-                            Image(systemName: isFavorited ? "star.fill" : "star")
-                                .font(.system(size: 14))
-                                .foregroundColor(isFavorited ? .yellow : .white.opacity(0.7))
+                        if showFavoriteButton {
+                            Button(action: onFavorite) {
+                                Image(systemName: isFavorited ? "star.fill" : "star")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(isFavorited ? .yellow : .white.opacity(0.7))
+                            }
                         }
                         
                         Button(action: onMore) {

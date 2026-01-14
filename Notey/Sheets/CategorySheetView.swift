@@ -63,6 +63,8 @@ struct CategorySheetView: View {
                                         Text(category.title)
                                             .font(.system(size: 17, weight: .semibold))
                                             .foregroundColor(.white)
+                                            .lineLimit(2)
+                                            .multilineTextAlignment(.leading)
                                         
                                         Spacer()
                                         

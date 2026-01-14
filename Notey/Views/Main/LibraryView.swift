@@ -10,6 +10,7 @@ import SwiftUI
 struct LibraryView: View {
     @Binding var personalLibrary: [Folder]
     @Binding var uncategorizedNotes: [Note]
+    @Binding var recentlyClassifiedNotes: [Note] // 最近分类的笔记
     let onMoveNoteToFolder: (String, String) -> Void  // (noteId, folderId) -> Void
     let onDeleteNote: (String) -> Void  // 删除笔记的回调
     @State private var expandedFolders: Set<String> = []
@@ -48,8 +49,9 @@ struct LibraryView: View {
         return notes
     }
     
-    var displayedFavoritedNotes: [Note] {
-        Array(favoritedNotes.prefix(8))
+    // 显示的最近笔记（最多8个）
+    var displayedRecentNotes: [Note] {
+        Array(recentlyClassifiedNotes.prefix(8))
     }
     
     // 获取包含收藏笔记的文件夹
@@ -103,9 +105,9 @@ struct LibraryView: View {
                     .padding(.top, 20)
                     .padding(.bottom, 8)
                     
-                    // Favorites Section
+                    // Recent Notes Section (最近笔记)
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("最近收藏的笔记")
+                        Text("最近笔记")
                             .font(.aclonica(size: 20))
                             .foregroundColor(.white.opacity(0.6))
                             .textCase(.uppercase)
@@ -114,21 +116,21 @@ struct LibraryView: View {
                         
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 12) {
-                                ForEach(displayedFavoritedNotes) { note in
+                                ForEach(displayedRecentNotes) { note in
                                     FavoriteGridItem(note: note) {
                                         onLibraryNoteClick(note.id)
                                     }
                                 }
                                 
                                 // "查看更多"卡片
-                                if favoritedNotes.count > 0 {
+                                if recentlyClassifiedNotes.count > 0 {
                                     Button(action: {
                                         withAnimation {
-                                            isFavoritesExpanded = true
+                                            isMyNotesExpanded = true
                                             // 使用 DispatchQueue 确保展开动画完成后再滚动
                                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                                                 withAnimation {
-                                                    proxy.scrollTo("myFavoritesSection", anchor: .top)
+                                                    proxy.scrollTo("myNotesSection", anchor: .top)
                                                 }
                                             }
                                         }
@@ -151,12 +153,12 @@ struct LibraryView: View {
                                                 .frame(width: 48, height: 48)
                                                 
                                                 VStack(spacing: 4) {
-                                                    Text("前往我的收藏中")
+                                                    Text("前往我的笔记中")
                                                         .font(.system(size: 13, weight: .medium))
                                                         .foregroundColor(.white.opacity(0.8))
                                                         .multilineTextAlignment(.center)
                                                     
-                                                    Text("查看更多收藏的笔记")
+                                                    Text("查看更多笔记")
                                                         .font(.system(size: 12))
                                                         .foregroundColor(.white.opacity(0.6))
                                                         .multilineTextAlignment(.center)
@@ -180,7 +182,6 @@ struct LibraryView: View {
                             .textCase(.uppercase)
                             .tracking(0.5)
                             .padding(.horizontal, 4)
-                            .id("myFavoritesSection") // 将 ID 移到这里，确保顶部对齐
                         
                         // My Favorites Card
                         GlassCard {
@@ -349,6 +350,7 @@ struct LibraryView: View {
                                 }
                             }
                         }
+                        .id("myNotesSection") // 将ID放在"我的笔记"卡片上
                         
                         // Uncategorized Notes Card
                         GlassCard {
@@ -380,9 +382,10 @@ struct LibraryView: View {
                                         ForEach(uncategorizedNotes) { note in
                                             NoteRow(
                                                 note: note,
-                                                isFavorited: favorites.contains(note.id),
+                                                isFavorited: false,
+                                                showFavoriteButton: false,
                                                 onTap: { categorySheetNoteId = note.id },
-                                                onFavorite: { toggleFavorite(note.id) },
+                                                onFavorite: { },
                                                 onMore: { actionSheetId = note.id }
                                             )
                                         }
@@ -518,6 +521,10 @@ struct CategoryItem: Identifiable {
             Note(id: "unc-1", title: "随手记录 - 项目想法", icon: "📝"),
             Note(id: "unc-2", title: "临时笔记", icon: "📝")
         ]
+        @State var recentNotes = [
+            Note(id: "1-1", title: "Technical Interview Notes", icon: "📄"),
+            Note(id: "11-1", title: "yolo模型与cnn", icon: "📄")
+        ]
         
         var body: some View {
             ZStack {
@@ -533,6 +540,7 @@ struct CategoryItem: Identifiable {
                 LibraryView(
                     personalLibrary: $library,
                     uncategorizedNotes: $uncategorized,
+                    recentlyClassifiedNotes: $recentNotes,
                     onMoveNoteToFolder: { noteId, folderId in
                         print("📦 Preview: 移动笔记 \(noteId) 到文件夹 \(folderId)")
                         
@@ -557,6 +565,12 @@ struct CategoryItem: Identifiable {
                         }
                         library[folderIndex].children?.append(note)
                         uncategorized.remove(at: noteIndex)
+                        
+                        // 添加到最近笔记
+                        recentNotes.insert(note, at: 0)
+                        if recentNotes.count > 8 {
+                            recentNotes = Array(recentNotes.prefix(8))
+                        }
                         
                         print("✅ Preview: 移动完成，剩余未分类: \(uncategorized.count)")
                     },

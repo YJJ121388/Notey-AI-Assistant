@@ -18,19 +18,23 @@ struct FolderRow: View {
     var body: some View {
         Button(action: onTap) {
             GlassCard {
-                HStack(spacing: 12) {
+                HStack(alignment: .top, spacing: 12) {
                     Image(systemName: isExpanded ? "chevron.down" : "chevron.right")
                         .font(.system(size: 16))
                         .foregroundColor(.white.opacity(0.7))
+                        .padding(.top, 2)
                     
                     Text(folder.icon)
                         .font(.system(size: 18))
+                        .padding(.top, 1)
                     
                     Text(folder.title)
                         .font(.system(size: 15, weight: .medium))
                         .foregroundColor(.white)
-                    
-                    Spacer()
+                        .lineLimit(isExpanded ? nil : 1)
+                        .fixedSize(horizontal: false, vertical: isExpanded)
+                        .multilineTextAlignment(.leading)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     
                     HStack(spacing: 8) {
                         Button(action: onFavorite) {

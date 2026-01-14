@@ -63,6 +63,7 @@ struct ContentView: View {
             Note(id: "8-3", title: "餐厅推荐", icon: "⭐")
         ])
     ]
+    @State private var recentlyClassifiedNotes: [Note] = [] // 最近分类的笔记
     @State private var draftNotes: [DraftNote] = [
         DraftNote(id: "4", title: "UX Workshop Notes", summary: "Brainstorming session on improving user onboarding experience", timestamp: "Yesterday", videoUrl: "https://example.com/video/ux-workshop"),
         DraftNote(id: "5", title: "Marketing Strategy Call", summary: "Q1 campaign planning and budget allocation discussion", timestamp: "Jan 7", videoUrl: "https://example.com/video/marketing-call"),
@@ -107,6 +108,14 @@ struct ContentView: View {
         // 从未分类笔记中移除
         uncategorizedNotes.remove(at: noteIndex)
         print("✅ 移除成功，剩余未分类笔记: \(uncategorizedNotes.count)")
+        
+        // 添加到最近分类笔记列表（插入到开头）
+        recentlyClassifiedNotes.insert(note, at: 0)
+        // 只保留最多8个
+        if recentlyClassifiedNotes.count > 8 {
+            recentlyClassifiedNotes = Array(recentlyClassifiedNotes.prefix(8))
+        }
+        print("✅ 添加到最近笔记，当前数量: \(recentlyClassifiedNotes.count)")
     }
     
     // 删除笔记的函数
@@ -176,6 +185,7 @@ struct ContentView: View {
                     LibraryView(
                         personalLibrary: $personalLibrary,
                         uncategorizedNotes: $uncategorizedNotes,
+                        recentlyClassifiedNotes: $recentlyClassifiedNotes,
                         onMoveNoteToFolder: moveNoteToFolder,
                         onDeleteNote: deleteNote,
                         onLibraryNoteClick: { noteId in

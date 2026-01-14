@@ -123,10 +123,6 @@ struct DraftDetailView: View {
                                             .frame(maxWidth: .infinity)
                                             .padding(16)
                                         }
-                                        .overlay {
-                                            RoundedRectangle(cornerRadius: 30)
-                                                .stroke(.blue.opacity(0.5), lineWidth: 1)
-                                        }
                                     }
                                     
                                     Button(action: {
@@ -144,10 +140,6 @@ struct DraftDetailView: View {
                                             }
                                             .frame(maxWidth: .infinity)
                                             .padding(16)
-                                        }
-                                        .overlay {
-                                            RoundedRectangle(cornerRadius: 30)
-                                                .stroke(.red.opacity(0.4), lineWidth: 1)
                                         }
                                     }
                                 }
