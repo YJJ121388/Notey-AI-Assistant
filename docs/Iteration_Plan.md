@@ -304,39 +304,7 @@
 └─────────────────────┘      └─────────────────────┘
 ```
 
-### 7.2 API 选型建议
-
-| 用途 | 推荐服务 | 价格参考 | 备注 |
-|------|----------|----------|------|
-| 联网搜索 | Serper.dev | $50/5万次 | Google 搜索结果，支持中文 |
-| 联网搜索 (备选) | Bing Search API | $3/1000次 | 微软官方，稳定性高 |
-| LLM | Claude 3.5 Sonnet | ~$0.01/次 | 推理能力强，格式化输出稳定 |
-| LLM (备选) | GPT-4o-mini | ~$0.005/次 | 成本更低，速度更快 |
-
-### 7.3 数据模型
-
-```swift
-// AI 推荐项
-struct AIRecommendation: Identifiable, Codable {
-    let id: String
-    let icon: String        // emoji 图标
-    let title: String       // 推荐标题
-    let detail: String      // 详细描述
-    var isSelected: Bool    // 用户是否选中
-}
-
-// AI 拓展请求
-struct ExpandRequest: Codable {
-    let noteContent: String // 笔记原文
-    let noteTitle: String   // 笔记标题
-}
-
-// AI 拓展响应
-struct ExpandResponse: Codable {
-    let topic: String                    // 识别的主题
-    let recommendations: [AIRecommendation]  // 推荐列表
-}
-```
+### 7.2 API 选型
 
 ---
 
