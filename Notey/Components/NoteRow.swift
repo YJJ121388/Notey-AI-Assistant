@@ -11,6 +11,7 @@ struct NoteRow: View {
     let note: Note
     let isFavorited: Bool
     var showFavoriteButton: Bool = true
+    var isNewlyAdded: Bool = false // 是否是新添加的笔记
     let onTap: () -> Void
     let onFavorite: () -> Void
     let onMore: () -> Void
@@ -30,6 +31,13 @@ struct NoteRow: View {
                     Spacer()
                     
                     HStack(spacing: 8) {
+                        // 新添加标记 - 绿色小圆点
+                        if isNewlyAdded {
+                            Circle()
+                                .fill(Color.green)
+                                .frame(width: 8, height: 8)
+                        }
+                        
                         if showFavoriteButton {
                             Button(action: onFavorite) {
                                 Image(systemName: isFavorited ? "star.fill" : "star")
@@ -61,13 +69,24 @@ struct NoteRow: View {
         )
         .ignoresSafeArea()
         
-        NoteRow(
-            note: Note(title: "示例笔记", icon: "📄"),
-            isFavorited: false,
-            onTap: {},
-            onFavorite: {},
-            onMore: {}
-        )
+        VStack(spacing: 12) {
+            NoteRow(
+                note: Note(title: "普通笔记", icon: "📄"),
+                isFavorited: false,
+                onTap: {},
+                onFavorite: {},
+                onMore: {}
+            )
+            
+            NoteRow(
+                note: Note(title: "新添加的笔记", icon: "📄"),
+                isFavorited: false,
+                isNewlyAdded: true,
+                onTap: {},
+                onFavorite: {},
+                onMore: {}
+            )
+        }
         .padding()
     }
 }

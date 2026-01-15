@@ -11,7 +11,15 @@ struct ActionSheetView: View {
     @Environment(\.dismiss) var dismiss
     let isFavorited: Bool
     let onFavorite: () -> Void
+    let onMove: (() -> Void)? // 移动至其他文件夹
     let onDelete: () -> Void
+    
+    init(isFavorited: Bool, onFavorite: @escaping () -> Void, onMove: (() -> Void)? = nil, onDelete: @escaping () -> Void) {
+        self.isFavorited = isFavorited
+        self.onFavorite = onFavorite
+        self.onMove = onMove
+        self.onDelete = onDelete
+    }
     
     var body: some View {
         VStack(spacing: 0) {
@@ -64,6 +72,51 @@ struct ActionSheetView: View {
                     .frame(height: 64)
                 }
                 
+                // Move Button (如果提供了 onMove 回调)
+                if let onMove = onMove {
+                    Button(action: {
+                        dismiss()
+                        // 延迟执行以确保当前 sheet 关闭后再打开新的
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            onMove()
+                        }
+                    }) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(.white.opacity(0.25))
+                                .overlay {
+                                    RoundedRectangle(cornerRadius: 20)
+                                        .stroke(.white.opacity(0.5), lineWidth: 1.5)
+                                }
+                                .shadow(color: .black.opacity(0.12), radius: 8, x: 0, y: 4)
+                            
+                            HStack(spacing: 16) {
+                                ZStack {
+                                    Circle()
+                                        .fill(.white.opacity(0.3))
+                                        .overlay {
+                                            Circle()
+                                                .stroke(.white.opacity(0.4), lineWidth: 1)
+                                        }
+                                        .frame(width: 40, height: 40)
+                                    
+                                    Image(systemName: "folder.badge.plus")
+                                        .font(.system(size: 18))
+                                        .foregroundColor(.blue)
+                                }
+                                
+                                Text("移动至其他文件夹")
+                                    .font(.system(size: 17, weight: .semibold))
+                                    .foregroundColor(.white)
+                                
+                                Spacer()
+                            }
+                            .padding(.horizontal, 16)
+                        }
+                        .frame(height: 64)
+                    }
+                }
+                
                 // Delete Button
                 Button(action: {
                     onDelete()
@@ -81,21 +134,21 @@ struct ActionSheetView: View {
                         HStack(spacing: 16) {
                             ZStack {
                                 Circle()
-                                    .fill(.red.opacity(0.3))
+                                    .fill(.white.opacity(0.3))
                                     .overlay {
                                         Circle()
-                                            .stroke(.red.opacity(0.5), lineWidth: 1)
+                                            .stroke(.white.opacity(0.4), lineWidth: 1)
                                     }
                                     .frame(width: 40, height: 40)
                                 
                                 Image(systemName: "trash")
                                     .font(.system(size: 20))
-                                    .foregroundColor(.red.opacity(0.9))
+                                    .foregroundColor(.red)
                             }
                             
                             Text("删除该内容")
                                 .font(.system(size: 17, weight: .semibold))
-                                .foregroundColor(.red.opacity(0.9))
+                                .foregroundColor(.white)
                             
                             Spacer()
                         }
@@ -148,8 +201,11 @@ struct ActionSheetView: View {
         let spacing: CGFloat = 12 // 按钮之间的间距
         let bottomPadding: CGFloat = 20 // 底部内边距
         
-        // 拖动指示器 + 2个操作按钮 + 间距 + 底部内边距
-        let totalHeight = dragIndicatorHeight + (actionButtonHeight * 2) + spacing + bottomPadding
+        // 计算按钮数量：收藏 + 删除 + 移动（如果有）
+        let buttonCount: CGFloat = onMove != nil ? 3 : 2
+        let spacingCount = buttonCount - 1
+        
+        let totalHeight = dragIndicatorHeight + (actionButtonHeight * buttonCount) + (spacing * spacingCount) + bottomPadding
         
         return totalHeight
     }
@@ -169,6 +225,7 @@ struct ActionSheetView: View {
         ActionSheetView(
             isFavorited: false,
             onFavorite: {},
+            onMove: {},
             onDelete: {}
         )
     }

@@ -77,6 +77,8 @@ struct ContentView: View {
     @State private var showDataManagement = false
     @State private var showAbout = false
     @State private var scrollToUncategorized = false // 是否滚动到未分类区域
+    @State private var expandFolderId: String? = nil // 需要展开的文件夹 ID
+    @State private var newlyAddedNoteIds: Set<String> = [] // 新添加的笔记 ID 集合
     @StateObject private var toastManager = ToastManager()
     
     // 移动笔记到文件夹的函数
@@ -135,6 +137,12 @@ struct ContentView: View {
         }
         print("✅ 添加到最近笔记，当前数量: \(recentlyClassifiedNotes.count)")
         
+        // 设置需要展开的文件夹 ID
+        expandFolderId = folderId
+        
+        // 标记为新添加的笔记
+        newlyAddedNoteIds.insert(noteId)
+        
         // 显示分类成功提示
         toastManager.show("分类归档成功，已归档至「\(folderTitle)」")
     }
@@ -186,6 +194,74 @@ struct ContentView: View {
         
         print("❌ 未找到要删除的笔记")
     }
+    
+    // 在文件夹之间移动笔记
+    private func moveNoteBetweenFolders(noteId: String, fromFolderId: String, toFolderId: String) {
+        print("📦 ContentView: 移动笔记 \(noteId) 从 \(fromFolderId) 到 \(toFolderId)")
+        
+        // 如果源和目标相同，不做任何操作
+        if fromFolderId == toFolderId {
+            print("⚠️ 源文件夹和目标文件夹相同，跳过")
+            return
+        }
+        
+        var note: Note?
+        var targetFolderTitle: String = ""
+        
+        // 从源文件夹中找到并移除笔记
+        if fromFolderId == defaultFolder.id {
+            // 从默认文件夹移除
+            if let noteIndex = defaultFolder.children?.firstIndex(where: { $0.id == noteId }) {
+                note = defaultFolder.children?[noteIndex]
+                defaultFolder.children?.remove(at: noteIndex)
+                print("✅ 从默认文件夹移除笔记")
+            }
+        } else {
+            // 从普通文件夹移除
+            if let folderIndex = personalLibrary.firstIndex(where: { $0.id == fromFolderId }),
+               let noteIndex = personalLibrary[folderIndex].children?.firstIndex(where: { $0.id == noteId }) {
+                note = personalLibrary[folderIndex].children?[noteIndex]
+                personalLibrary[folderIndex].children?.remove(at: noteIndex)
+                print("✅ 从文件夹 \(personalLibrary[folderIndex].title) 移除笔记")
+            }
+        }
+        
+        guard let noteToMove = note else {
+            print("❌ 未找到要移动的笔记")
+            return
+        }
+        
+        // 添加到目标文件夹
+        if toFolderId == defaultFolder.id {
+            // 添加到默认文件夹
+            if defaultFolder.children == nil {
+                defaultFolder.children = []
+            }
+            defaultFolder.children?.append(noteToMove)
+            targetFolderTitle = defaultFolder.title
+            print("✅ 添加到默认文件夹")
+        } else {
+            // 添加到普通文件夹
+            if let folderIndex = personalLibrary.firstIndex(where: { $0.id == toFolderId }) {
+                if personalLibrary[folderIndex].children == nil {
+                    personalLibrary[folderIndex].children = []
+                }
+                personalLibrary[folderIndex].children?.append(noteToMove)
+                targetFolderTitle = personalLibrary[folderIndex].title
+                print("✅ 添加到文件夹 \(targetFolderTitle)")
+            }
+        }
+        
+        // 设置需要展开的文件夹
+        expandFolderId = toFolderId
+        
+        // 标记为新添加的笔记
+        newlyAddedNoteIds.insert(noteId)
+        
+        // 显示移动成功提示
+        toastManager.show("已移动至「\(targetFolderTitle)」")
+    }
+    
     var body: some View {
         ZStack {
             // Background gradient
@@ -226,9 +302,15 @@ struct ContentView: View {
                         recentlyClassifiedNotes: $recentlyClassifiedNotes,
                         defaultFolder: $defaultFolder,
                         onMoveNoteToFolder: moveNoteToFolder,
+                        onMoveNoteBetweenFolders: moveNoteBetweenFolders,
                         onDeleteNote: deleteNote,
                         scrollToUncategorized: scrollToUncategorized,
+                        expandFolderId: $expandFolderId,
+                        newlyAddedNoteIds: $newlyAddedNoteIds,
                         onLibraryNoteClick: { noteId in
+                            // 移除新添加标记
+                            newlyAddedNoteIds.remove(noteId)
+                            
                             // 先检查默认文件夹
                             if let note = defaultFolder.children?.first(where: { $0.id == noteId }) {
                                 selectedNote = note
