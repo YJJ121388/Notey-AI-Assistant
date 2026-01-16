@@ -35,6 +35,8 @@
 ### 🎨 v2.0 设计预览
 *[![Figma Prototype](https://www.figma.com/make/rCCEQ0FwF4Nxhu76ELrjqX/iOS-Home-Screen-Design?t=72eNiy6t0fJOUO3q-1)]*
 > *[v2.0 UI Mockups Coming Soon]*
+### 🎨 v2.0 设计亮点展示
+*[点击查看 V2.0 产品交互亮点展示文档](./V2.0%20关键交互与功能设计说明.md)*
 
 ---
 
@@ -72,7 +74,7 @@
 
 本项目遵循敏捷开发原则，当前处于 v2.0 核心重构阶段。
 
-👉 **[查看完整产品需求文档 (PRD)](Notey%20V2.0%20PRD.md)**
+👉 **[查看V2.0完整产品需求文档 (PRD)](Notey%20V2.0%20PRD.md)**
 
 - [x] **v1.0 (MVP)**: 验证“视频转笔记”核心价值，跑通 Coze 工作流。
 - [x] **v2.0 设计定义**: 确立深色毛玻璃风格，完成“额度控制”与“读写分离”交互设计。
