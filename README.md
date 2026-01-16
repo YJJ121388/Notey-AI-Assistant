@@ -34,7 +34,7 @@
 
 ### 🎨 v2.0 设计预览
 <img width="289" height="570" alt="image" src="https://github.com/user-attachments/assets/7ca88bb7-b545-4ed8-bb6b-7f23dd25f1c1" />
-
+👉 **[查看V2.0前端设计代码](./Notey)**
 ### 🎨 v2.0 设计亮点展示
 *[点击查看 V2.0 产品交互亮点展示文档](./V2.0%20关键交互与功能设计说明.md)*
 
@@ -76,10 +76,11 @@
 本项目遵循敏捷开发原则，当前处于 v2.0 核心重构阶段。
 
 👉 **[查看V2.0完整产品需求文档 (PRD)](Notey%20V2.0%20PRD.md)**
+👉 **[查看V2.0前端设计代码](./Notey)**
 
 - [x] **v1.0 (MVP)**: 验证“视频转笔记”核心价值，跑通 Coze 工作流。
 - [x] **v2.0 设计定义**: 确立深色毛玻璃风格，完成“额度控制”与“读写分离”交互设计。
-- [ ] **v2.0 基础架构**: 搭建 SwiftUI + SwiftData 框架。
+- [x]**v2.0 基础架构**: 搭建 SwiftUI + SwiftData 框架。
 - [ ] **v2.0 核心功能**: 实现 Share Extension 捕获与 Markdown 渲染器。
 - [ ] **v2.0 Release**: TestFlight 内测发布。
 
