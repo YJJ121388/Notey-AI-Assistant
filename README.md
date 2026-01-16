@@ -33,8 +33,8 @@
 * **🛡️ 容错与草稿箱**：网络失败不再丢数据，自动存入 Drafts 草稿箱，支持一键重试。
 
 ### 🎨 v2.0 设计预览
-*[![Figma Prototype](https://www.figma.com/make/rCCEQ0FwF4Nxhu76ELrjqX/iOS-Home-Screen-Design?t=72eNiy6t0fJOUO3q-1)]*
-> *[v2.0 UI Mockups Coming Soon]*
+<img width="289" height="570" alt="image" src="https://github.com/user-attachments/assets/7ca88bb7-b545-4ed8-bb6b-7f23dd25f1c1" />
+
 ### 🎨 v2.0 设计亮点展示
 *[点击查看 V2.0 产品交互亮点展示文档](./V2.0%20关键交互与功能设计说明.md)*
 
@@ -45,7 +45,8 @@
 > 如果你想立即体验 Notey 的核心流程，可以使用 v1.0 稳定版快捷指令。
 
 ### 📸 v1.0 工作流演示
-[![点击观看视频](https://github.com/user-attachments/assets/3c6f2c72-56b8-4a03-8b8b-f727e658b339)](https://www.bilibili.com/video/BV1ZPimBQEJg/)
+[[点击观看视频]<img width="289" height="570" alt="image" src="https://github.com/user-attachments/assets/7e0e2b16-599d-4b72-964d-f5c9e4e3eb47" />
+](https://www.bilibili.com/video/BV1ZPimBQEJg/)
 
 ### 🛠 v1.0 技术架构
 * **前端交互**：iOS Shortcuts (原生快捷指令)
