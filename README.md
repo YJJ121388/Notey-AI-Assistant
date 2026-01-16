@@ -45,7 +45,7 @@
 > 如果你想立即体验 Notey 的核心流程，可以使用 v1.0 稳定版快捷指令。
 
 ### 📸 v1.0 工作流演示
-[[点击观看视频]<img width="289" height="570" alt="image" src="https://github.com/user-attachments/assets/7e0e2b16-599d-4b72-964d-f5c9e4e3eb47" />
+[[点击图片观看视频演示]<img width="289" height="570" alt="image" src="https://github.com/user-attachments/assets/7e0e2b16-599d-4b72-964d-f5c9e4e3eb47" />
 ](https://www.bilibili.com/video/BV1ZPimBQEJg/)
 
 ### 🛠 v1.0 技术架构
