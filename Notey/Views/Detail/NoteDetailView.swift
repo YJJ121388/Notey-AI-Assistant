@@ -12,6 +12,7 @@ struct NoteDetailView: View {
     @State private var isEditing = false
     @State private var editedTitle: String
     @State private var editedContent: String
+    @State private var showCopiedToast = false
     
     private let maxTitleCharacters = 30
     
@@ -53,6 +54,40 @@ struct NoteDetailView: View {
                 editingView
             } else {
                 readingView
+            }
+            
+            // 复制成功提示
+            if showCopiedToast {
+                VStack {
+                    HStack(spacing: 8) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 16))
+                            .foregroundColor(.green)
+                        
+                        Text("已复制到剪贴板")
+                            .font(.system(size: 15, weight: .medium))
+                            .foregroundColor(.white)
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 12)
+                    .background(
+                        Capsule()
+                            .fill(.ultraThinMaterial)
+                            .overlay {
+                                Capsule()
+                                    .fill(Color.black.opacity(0.5))
+                            }
+                            .overlay {
+                                Capsule()
+                                    .stroke(.white.opacity(0.3), lineWidth: 1)
+                            }
+                    )
+                    .padding(.top, 60)
+                    
+                    Spacer()
+                }
+                .transition(.move(edge: .top).combined(with: .opacity))
+                .animation(.easeInOut(duration: 0.3), value: showCopiedToast)
             }
         }
     }
@@ -174,6 +209,51 @@ struct NoteDetailView: View {
                         }
                         .padding(24)
                     }
+                    
+                    // 视频链接卡片
+                    if let videoUrl = note.videoUrl {
+                        GlassCard {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("原视频链接：")
+                                    .font(.system(size: 13))
+                                    .foregroundColor(.white.opacity(0.7))
+                                
+                                HStack(spacing: 12) {
+                                    Text(videoUrl)
+                                        .font(.system(size: 14))
+                                        .foregroundColor(.blue.opacity(0.8))
+                                        .lineLimit(1)
+                                    
+                                    Spacer()
+                                    
+                                    Button(action: {
+                                        UIPasteboard.general.string = videoUrl
+                                        showCopiedToast = true
+                                        
+                                        // 2秒后自动隐藏提示
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                            showCopiedToast = false
+                                        }
+                                    }) {
+                                        ZStack {
+                                            RoundedRectangle(cornerRadius: 12)
+                                                .fill(.white.opacity(0.2))
+                                                .overlay {
+                                                    RoundedRectangle(cornerRadius: 12)
+                                                        .stroke(.white.opacity(0.3), lineWidth: 1)
+                                                }
+                                                .frame(width: 44, height: 44)
+                                            
+                                            Image(systemName: "doc.on.doc")
+                                                .font(.system(size: 18))
+                                                .foregroundColor(.white)
+                                        }
+                                    }
+                                }
+                            }
+                            .padding(16)
+                        }
+                    }
                 }
                 .padding(.horizontal, 16)
                 .padding(.bottom, 40) // 为底部安全区域留出空间
@@ -276,7 +356,8 @@ struct NoteDetailView: View {
             id: "preview-1",
             title: "示例笔记",
             icon: "📄",
-            content: "这是笔记的详细内容。您可以在这里记录更多信息、想法和细节。\n\n点击右上角的铅笔图标开始编辑。"
+            content: "这是笔记的详细内容。您可以在这里记录更多信息、想法和细节。\n\n点击右上角的铅笔图标开始编辑。",
+            videoUrl: "https://example.com/video/sample-video"
         ),
         onBack: {},
         onSave: { _, _, _ in }

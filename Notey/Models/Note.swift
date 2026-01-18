@@ -15,8 +15,9 @@ struct Note: Identifiable, Codable, Equatable {
     var timestamp: Date?
     var createdAt: Date?
     var lastEdited: Date?
+    var videoUrl: String?
     
-    init(id: String = UUID().uuidString, title: String, icon: String, content: String? = nil, timestamp: Date? = nil, createdAt: Date? = nil, lastEdited: Date? = nil) {
+    init(id: String = UUID().uuidString, title: String, icon: String, content: String? = nil, timestamp: Date? = nil, createdAt: Date? = nil, lastEdited: Date? = nil, videoUrl: String? = nil) {
         self.id = id
         self.title = title
         self.icon = icon
@@ -24,5 +25,6 @@ struct Note: Identifiable, Codable, Equatable {
         self.timestamp = timestamp
         self.createdAt = createdAt ?? Date()
         self.lastEdited = lastEdited ?? Date()
+        self.videoUrl = videoUrl
     }
 }

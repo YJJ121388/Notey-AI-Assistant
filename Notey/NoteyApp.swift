@@ -10,6 +10,8 @@ import SwiftData
 
 @main
 struct NoteyApp: App {
+    @State private var isLoading = true
+    
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Item.self,
@@ -25,7 +27,19 @@ struct NoteyApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            if isLoading {
+                SplashView()
+                    .onAppear {
+                        // 模拟加载时间，可根据实际需要调整
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                            withAnimation(.easeOut(duration: 0.3)) {
+                                isLoading = false
+                            }
+                        }
+                    }
+            } else {
+                ContentView()
+            }
         }
     }
 }

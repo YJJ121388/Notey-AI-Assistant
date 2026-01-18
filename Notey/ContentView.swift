@@ -10,57 +10,57 @@ import SwiftUI
 struct ContentView: View {
     @State private var activeTab: Tab = .recent
     @State private var uncategorizedNotes: [Note] = [
-        Note(id: "unc-1", title: "随手记录 - 项目想法", icon: "📝"),
-        Note(id: "unc-2", title: "临时笔记 - 会议记录", icon: "📝"),
-        Note(id: "unc-3", title: "待整理 - 学习资料", icon: "📝"),
-        Note(id: "unc-4", title: "灵感备忘录", icon: "💡"),
-        Note(id: "unc-5", title: "读书笔记 - 设计心理学", icon: "📚"),
-        Note(id: "unc-6", title: "旅行计划草稿", icon: "✈️")
+        Note(id: "unc-1", title: "随手记录 - 项目想法", icon: "📝", videoUrl: "https://example.com/video/project-idea"),
+        Note(id: "unc-2", title: "临时笔记 - 会议记录", icon: "📝", videoUrl: "https://example.com/video/meeting-notes"),
+        Note(id: "unc-3", title: "待整理 - 学习资料", icon: "📝", videoUrl: "https://example.com/video/study-materials"),
+        Note(id: "unc-4", title: "灵感备忘录", icon: "💡", videoUrl: "https://example.com/video/inspiration"),
+        Note(id: "unc-5", title: "读书笔记 - 设计心理学", icon: "📚", videoUrl: "https://example.com/video/book-notes"),
+        Note(id: "unc-6", title: "旅行计划草稿", icon: "✈️", videoUrl: "https://example.com/video/travel-plan")
     ]
     @State private var personalLibrary: [Folder] = [
         Folder(id: "1", title: "Interview", icon: "📁", children: [
-            Note(id: "1-1", title: "Technical Interview Notes", icon: "📄"),
-            Note(id: "1-2", title: "Behavioral Questions", icon: "📄"),
-            Note(id: "1-3", title: "Company Research", icon: "📄"),
-            Note(id: "1-4", title: "Salary Negotiation Tips", icon: "💰")
+            Note(id: "1-1", title: "Technical Interview Notes", icon: "📄", videoUrl: "https://example.com/video/tech-interview"),
+            Note(id: "1-2", title: "Behavioral Questions", icon: "📄", videoUrl: "https://example.com/video/behavioral"),
+            Note(id: "1-3", title: "Company Research", icon: "📄", videoUrl: "https://example.com/video/company-research"),
+            Note(id: "1-4", title: "Salary Negotiation Tips", icon: "💰", videoUrl: "https://example.com/video/salary-tips")
         ]),
         Folder(id: "2", title: "TERM 2", icon: "📚", children: [
-            Note(id: "2-1", title: "Lecture Notes - Week 1", icon: "📄"),
-            Note(id: "2-2", title: "Lecture Notes - Week 2", icon: "📄"),
-            Note(id: "2-3", title: "Assignment Ideas", icon: "📄"),
-            Note(id: "2-4", title: "Group Project Plan", icon: "👥"),
-            Note(id: "2-5", title: "Exam Preparation", icon: "📝")
+            Note(id: "2-1", title: "Lecture Notes - Week 1", icon: "📄", videoUrl: "https://example.com/video/lecture-week1"),
+            Note(id: "2-2", title: "Lecture Notes - Week 2", icon: "📄", videoUrl: "https://example.com/video/lecture-week2"),
+            Note(id: "2-3", title: "Assignment Ideas", icon: "📄", videoUrl: "https://example.com/video/assignment"),
+            Note(id: "2-4", title: "Group Project Plan", icon: "👥", videoUrl: "https://example.com/video/group-project"),
+            Note(id: "2-5", title: "Exam Preparation", icon: "📝", videoUrl: "https://example.com/video/exam-prep")
         ]),
         Folder(id: "3", title: "Enhancement", icon: "⚡", children: [
-            Note(id: "3-1", title: "UI Improvements", icon: "🎨"),
-            Note(id: "3-2", title: "Feature Requests", icon: "✨"),
-            Note(id: "3-3", title: "Bug Fixes", icon: "🐛")
+            Note(id: "3-1", title: "UI Improvements", icon: "🎨", videoUrl: "https://example.com/video/ui-improvements"),
+            Note(id: "3-2", title: "Feature Requests", icon: "✨", videoUrl: "https://example.com/video/features"),
+            Note(id: "3-3", title: "Bug Fixes", icon: "🐛", videoUrl: "https://example.com/video/bug-fixes")
         ]),
         Folder(id: "4", title: "神经网络学习", icon: "🧠", children: [
-            Note(id: "4-1", title: "YOLO模型与CNN", icon: "📄"),
-            Note(id: "4-2", title: "反向传播算法", icon: "📄"),
-            Note(id: "4-3", title: "激活函数对比", icon: "📊")
+            Note(id: "4-1", title: "YOLO模型与CNN", icon: "📄", videoUrl: "https://example.com/video/yolo-cnn"),
+            Note(id: "4-2", title: "反向传播算法", icon: "📄", videoUrl: "https://example.com/video/backprop"),
+            Note(id: "4-3", title: "激活函数对比", icon: "📊", videoUrl: "https://example.com/video/activation")
         ]),
         Folder(id: "5", title: "健身计划", icon: "💪", children: [
-            Note(id: "5-1", title: "周一 - 胸部训练", icon: "🏋️"),
-            Note(id: "5-2", title: "周三 - 背部训练", icon: "🏋️"),
-            Note(id: "5-3", title: "周五 - 腿部训练", icon: "🏋️"),
-            Note(id: "5-4", title: "饮食计划", icon: "🥗")
+            Note(id: "5-1", title: "周一 - 胸部训练", icon: "🏋️", videoUrl: "https://example.com/video/chest-workout"),
+            Note(id: "5-2", title: "周三 - 背部训练", icon: "🏋️", videoUrl: "https://example.com/video/back-workout"),
+            Note(id: "5-3", title: "周五 - 腿部训练", icon: "🏋️", videoUrl: "https://example.com/video/leg-workout"),
+            Note(id: "5-4", title: "饮食计划", icon: "🥗", videoUrl: "https://example.com/video/diet-plan")
         ]),
         Folder(id: "6", title: "读书笔记", icon: "📖", children: [
-            Note(id: "6-1", title: "设计心理学 - 第一章", icon: "📄"),
-            Note(id: "6-2", title: "人类简史 - 读后感", icon: "📄"),
-            Note(id: "6-3", title: "代码大全 - 重点摘录", icon: "💻")
+            Note(id: "6-1", title: "设计心理学 - 第一章", icon: "📄", videoUrl: "https://example.com/video/design-psychology"),
+            Note(id: "6-2", title: "人类简史 - 读后感", icon: "📄", videoUrl: "https://example.com/video/sapiens"),
+            Note(id: "6-3", title: "代码大全 - 重点摘录", icon: "💻", videoUrl: "https://example.com/video/code-complete")
         ]),
         Folder(id: "7", title: "旅行规划", icon: "🗺️", children: [
-            Note(id: "7-1", title: "日本旅行攻略", icon: "🗾"),
-            Note(id: "7-2", title: "欧洲行程安排", icon: "🏰"),
-            Note(id: "7-3", title: "旅行装备清单", icon: "🎒")
+            Note(id: "7-1", title: "日本旅行攻略", icon: "🗾", videoUrl: "https://example.com/video/japan-travel"),
+            Note(id: "7-2", title: "欧洲行程安排", icon: "🏰", videoUrl: "https://example.com/video/europe-trip"),
+            Note(id: "7-3", title: "旅行装备清单", icon: "🎒", videoUrl: "https://example.com/video/travel-gear")
         ]),
         Folder(id: "8", title: "美食记录", icon: "🍜", children: [
-            Note(id: "8-1", title: "川菜菜谱", icon: "🌶️"),
-            Note(id: "8-2", title: "烘焙笔记", icon: "🍰"),
-            Note(id: "8-3", title: "餐厅推荐", icon: "⭐")
+            Note(id: "8-1", title: "川菜菜谱", icon: "🌶️", videoUrl: "https://example.com/video/sichuan-cuisine"),
+            Note(id: "8-2", title: "烘焙笔记", icon: "🍰", videoUrl: "https://example.com/video/baking"),
+            Note(id: "8-3", title: "餐厅推荐", icon: "⭐", videoUrl: "https://example.com/video/restaurant-review")
         ])
     ]
     @State private var recentlyClassifiedNotes: [Note] = [] // 最近分类的笔记
