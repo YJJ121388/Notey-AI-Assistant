@@ -1,0 +1,152 @@
+{
+  "plugin_name": "Douyin Video Parser",
+  "description": "提取抖音/TikTok视频音频直链，用于AI总结",
+  "version": "1.0.0",
+  "author": "Notey Team",
+  "api_config": {
+    "base_url": "https://your-domain.com",
+    "endpoints": [
+      {
+        "name": "extract_audio",
+        "path": "/extract_audio",
+        "method": "GET",
+        "description": "提取视频音频直链",
+        "timeout": 30,
+        "parameters": [
+          {
+            "name": "url",
+            "type": "string",
+            "required": true,
+            "description": "视频分享链接（支持抖音、TikTok、B站等）",
+            "example": "https://www.douyin.com/video/7596656920576970025"
+          }
+        ],
+        "response": {
+          "success": {
+            "status_code": 200,
+            "schema": {
+              "status": "success",
+              "data": {
+                "audio_url": "string - 音频直链地址",
+                "original_url": "string - 原始视频链接",
+                "metadata": {
+                  "title": "string - 视频标题",
+                  "author": "string - 作者名",
+                  "duration": "number - 视频时长（秒）",
+                  "description": "string - 视频描述"
+                }
+              }
+            },
+            "example": {
+              "status": "success",
+              "data": {
+                "audio_url": "https://v3-dy-d.zjcdn.com/...",
+                "original_url": "https://www.douyin.com/video/7596656920576970025",
+                "metadata": {
+                  "title": "如何高效学习编程",
+                  "author": "技术博主",
+                  "duration": 120,
+                  "description": "分享编程学习方法"
+                }
+              }
+            }
+          },
+          "error": {
+            "status_codes": {
+              "400": "不支持的URL格式",
+              "500": "解析失败",
+              "503": "网络错误",
+              "504": "解析超时"
+            },
+            "schema": {
+              "detail": "string - 错误详情"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "usage_in_workflow": {
+    "step_1": {
+      "description": "接收视频URL",
+      "input": "{{video_url}}",
+      "note": "从iOS Shortcuts或用户输入获取"
+    },
+    "step_2": {
+      "description": "调用Douyin Parser插件",
+      "action": "extract_audio",
+      "input": {
+        "url": "{{video_url}}"
+      },
+      "output": "{{parser_result}}"
+    },
+    "step_3": {
+      "description": "提取音频URL",
+      "expression": "{{parser_result.data.audio_url}}",
+      "output": "{{audio_url}}"
+    },
+    "step_4": {
+      "description": "传递给ASR服务",
+      "input": "{{audio_url}}",
+      "note": "用于语音转文字"
+    }
+  },
+  "error_handling": {
+    "timeout": {
+      "description": "解析超时（>30秒）",
+      "action": "返回错误信息给用户，建议稍后重试"
+    },
+    "invalid_url": {
+      "description": "不支持的URL格式",
+      "action": "提示用户检查链接是否正确"
+    },
+    "network_error": {
+      "description": "网络连接失败",
+      "action": "重试3次，失败后返回错误"
+    },
+    "parsing_failed": {
+      "description": "视频解析失败",
+      "action": "记录日志，返回友好错误信息"
+    }
+  },
+  "deployment": {
+    "recommended_platforms": [
+      {
+        "name": "Render",
+        "pros": "免费套餐，易于部署",
+        "cons": "免费版会休眠",
+        "url": "https://render.com"
+      },
+      {
+        "name": "Railway",
+        "pros": "自动检测Dockerfile，简单快速",
+        "cons": "按量计费",
+        "url": "https://railway.app"
+      },
+      {
+        "name": "阿里云ECS",
+        "pros": "完全控制，稳定性高",
+        "cons": "需要手动配置",
+        "url": "https://ecs.aliyun.com"
+      }
+    ],
+    "environment_variables": {
+      "HOST": "0.0.0.0",
+      "PORT": "8000",
+      "TIMEOUT": "30",
+      "PROXY_URL": "可选 - 代理服务器地址"
+    }
+  },
+  "maintenance": {
+    "update_ytdlp": {
+      "frequency": "每月或遇到解析失败时",
+      "command": "pip install --upgrade yt-dlp"
+    },
+    "monitor_logs": {
+      "focus": "解析失败率、响应时间、错误类型"
+    },
+    "backup_plan": {
+      "description": "如果yt-dlp失败，考虑集成商用API"
+    }
+  }
+}
