@@ -40,6 +40,7 @@
 ### 🎨 v2.0 设计亮点展示
 *[点击查看 V2.0 产品交互亮点展示文档](./V2.0%20关键交互与功能设计说明.md)*
 
+*[点击查看 V2.0 产品交互演示视频](https://www.bilibili.com/video/BV1CbktBxEGE/?vd_source=5590bc68057b5703c7b4d1839d61c7e1)*
 ---
 
 ## 📺 Legacy: Notey v1.0 (Stable MVP)
